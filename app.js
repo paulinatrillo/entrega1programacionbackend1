@@ -1,8 +1,13 @@
 const express = require('express');
 const app = express();
 
-app.use(express.json()); 
+const productRouter = require('./routes/productRouter');
+const cartRouter = require('./routes/cartRouter');
 
+app.use(express.json());
+
+app.use('/api/products', productRouter);
+app.use('/api/carts', cartRouter);
 
 app.get('/', (req, res) => {
   res.send('Servidor funcionando');

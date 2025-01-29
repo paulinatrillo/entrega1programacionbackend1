@@ -1,34 +1,39 @@
-import { Router } from 'express';
-import ProductManager from '../managers/ProductManager.js';
-
-const router = Router();
-const productManager = new ProductManager();
+const express = require('express');
+const router = express.Router();
+const ProductManager = require('../managers/ProductManager');
+const manager = new ProductManager('./data/products.json');
 
 router.get('/', async (req, res) => {
-  const products = await productManager.getProducts();
-  res.json(products);
+  const limit = req.query.limit;
+  try {
+    const products = await manager.getProducts();
+    if (limit) {
+      res.send(products.slice(0, limit));
+    } else {
+      res.send(products);
+    }
+  } catch (error) {
+    res.status(500).send('Error al obtener los productos');
+  }
 });
 
 router.get('/:pid', async (req, res) => {
-  const product = await productManager.getProductById(Number(req.params.pid));
-  product ? res.json(product) : res.status(404).send('Producto no encontrado');
+  const product = await manager.getProductById(parseInt(req.params.pid));
+  if (product === 'Producto no encontrado') {
+    res.status(404).send(product);
+  } else {
+    res.json(product);
+  }
 });
 
 router.post('/', async (req, res) => {
-  const product = req.body;
-  const newProduct = await productManager.addProduct(product);
-  res.status(201).json(newProduct);
+  const nuevoProducto = req.body;
+  try {
+    await manager.addProduct(nuevoProducto);
+    res.status(201).send({ message: 'Producto agregado exitosamente' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error al agregar producto' });
+  }
 });
 
-router.put('/:pid', async (req, res) => {
-  const updates = req.body;
-  const updatedProduct = await productManager.updateProduct(Number(req.params.pid), updates);
-  updatedProduct ? res.json(updatedProduct) : res.status(404).send('Producto no encontrado');
-});
-
-router.delete('/:pid', async (req, res) => {
-  const deletedProduct = await productManager.deleteProduct(Number(req.params.pid));
-  deletedProduct ? res.sendStatus(204) : res.status(404).send('Producto no encontrado');
-});
-
-export default router;
+module.exports = router;

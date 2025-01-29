@@ -1,30 +1,42 @@
-import path from 'path';
-
-const cartsPath = path.resolve('./data/carts.json');
+const fs = require('fs').promises;
 
 class CartManager {
-  async getCarts() {
-    const data = await fs.readFile(cartsPath, 'utf-8');
-    return JSON.parse(data);
-  }
+  static ultId = 0;
 
-  async getCartById(id) {
-    const carts = await this.getCarts();
-    return carts.find(cart => cart.id === id);
+  constructor(path) {
+    this.carts = [];
+    this.path = path;
   }
 
   async createCart() {
-    const carts = await this.getCarts();
-    const newCart = { id: this.#generateId(carts), products: [] };
-    carts.push(newCart);
-    await fs.writeFile(cartsPath, JSON.stringify(carts, null, 2));
-    return newCart;
+    try {
+      const arrayCarts = await this.leerArchivo();
+
+      const newCart = {
+        id: ++CartManager.ultId,
+        products: [],
+      };
+
+      arrayCarts.push(newCart);
+      await this.guardarArchivo(arrayCarts);
+      return newCart;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getCartById(id) {
+    const arrayCarts = await this.leerArchivo();
+    return arrayCarts.find(cart => cart.id === id);
   }
 
   async addProductToCart(cartId, productId) {
-    const carts = await this.getCarts();
-    const cart = carts.find(cart => cart.id === cartId);
-    if (!cart) return null;
+    const arrayCarts = await this.leerArchivo();
+    const cart = arrayCarts.find(cart => cart.id === cartId);
+
+    if (!cart) {
+      return null;
+    }
 
     const existingProduct = cart.products.find(p => p.product === productId);
     if (existingProduct) {
@@ -33,13 +45,18 @@ class CartManager {
       cart.products.push({ product: productId, quantity: 1 });
     }
 
-    await fs.writeFile(cartsPath, JSON.stringify(carts, null, 2));
+    await this.guardarArchivo(arrayCarts);
     return cart;
   }
 
-  #generateId(carts) {
-    return carts.length ? Math.max(...carts.map(c => c.id)) + 1 : 1;
+  async leerArchivo() {
+    const respuesta = await fs.readFile(this.path, 'utf-8');
+    return JSON.parse(respuesta);
+  }
+
+  async guardarArchivo(arrayCarts) {
+    await fs.writeFile(this.path, JSON.stringify(arrayCarts, null, 2));
   }
 }
 
-export default CartManager;
+module.exports = CartManager;

@@ -1,23 +1,33 @@
-import { Router } from 'express';
-import CartManager from '../managers/CartManager.js';
-
-const router = Router();
-const cartManager = new CartManager();
+const express = require('express');
+const router = express.Router();
+const CartManager = require('../managers/CartManager');
+const manager = new CartManager('./data/carts.json');
 
 router.post('/', async (req, res) => {
-  const newCart = await cartManager.createCart();
-  res.status(201).json(newCart);
+  try {
+    const newCart = await manager.createCart();
+    res.status(201).json(newCart);
+  } catch (error) {
+    res.status(500).send('Error al crear el carrito');
+  }
 });
 
 router.get('/:cid', async (req, res) => {
-  const cart = await cartManager.getCartById(Number(req.params.cid));
-  cart ? res.json(cart) : res.status(404).send('Carrito no encontrado');
+  const cart = await manager.getCartById(Number(req.params.cid));
+  if (!cart) {
+    res.status(404).send('Carrito no encontrado');
+  } else {
+    res.json(cart);
+  }
 });
 
 router.post('/:cid/product/:pid', async (req, res) => {
-  const { cid, pid } = req.params;
-  const updatedCart = await cartManager.addProductToCart(Number(cid), Number(pid));
-  updatedCart ? res.json(updatedCart) : res.status(404).send('Carrito o producto no encontrado');
+  const updatedCart = await manager.addProductToCart(Number(req.params.cid), Number(req.params.pid));
+  if (!updatedCart) {
+    res.status(404).send('Carrito o producto no encontrado');
+  } else {
+    res.json(updatedCart);
+  }
 });
 
-export default router;
+module.exports = router;

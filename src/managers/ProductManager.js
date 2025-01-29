@@ -1,49 +1,74 @@
-import fs from 'fs/promises';
-import path from 'path';
-
-const productsPath = path.resolve('./data/products.json');
+const fs = require('fs').promises;
 
 class ProductManager {
+  static ultId = 0;
+
+  constructor(path) {
+    this.products = [];
+    this.path = path;
+  }
+
+  async addProduct({ title, description, price, img, code, stock, category, thumbnails }) {
+    try {
+      const arrayProductos = await this.leerArchivo();
+
+      if (!title || !description || !price || !img || !code || !stock || !category) {
+        return;
+      }
+
+      if (arrayProductos.some(item => item.code === code)) {
+        return;
+      }
+
+      const nuevoProducto = {
+        title,
+        description,
+        price,
+        img,
+        code,
+        stock,
+        category,
+        status: true,
+        thumbnails: thumbnails || [],
+      };
+
+      if (arrayProductos.length > 0) {
+        ProductManager.ultId = arrayProductos.reduce((maxId, product) => Math.max(maxId, product.id), 0);
+      }
+
+      nuevoProducto.id = ++ProductManager.ultId;
+      arrayProductos.push(nuevoProducto);
+
+      await this.guardarArchivo(arrayProductos);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getProducts() {
-    const data = await fs.readFile(productsPath, 'utf-8');
-    return JSON.parse(data);
+    const arrayProductos = await this.leerArchivo();
+    return arrayProductos;
   }
 
   async getProductById(id) {
-    const products = await this.getProducts();
-    return products.find(product => product.id === id);
+    const arrayProductos = await this.leerArchivo();
+    const producto = arrayProductos.find(item => item.id === id);
+
+    if (!producto) {
+      return 'Producto no encontrado';
+    } else {
+      return producto;
+    }
   }
 
-  async addProduct(product) {
-    const products = await this.getProducts();
-    const newProduct = { id: this.#generateId(products), ...product };
-    products.push(newProduct);
-    await fs.writeFile(productsPath, JSON.stringify(products, null, 2));
-    return newProduct;
+  async leerArchivo() {
+    const respuesta = await fs.readFile(this.path, 'utf-8');
+    return JSON.parse(respuesta);
   }
 
-  async updateProduct(id, updates) {
-    const products = await this.getProducts();
-    const index = products.findIndex(product => product.id === id);
-    if (index === -1) return null;
-
-    products[index] = { ...products[index], ...updates, id }; 
-    await fs.writeFile(productsPath, JSON.stringify(products, null, 2));
-    return products[index];
-  }
-
-  async deleteProduct(id) {
-    const products = await this.getProducts();
-    const filteredProducts = products.filter(product => product.id !== id);
-    if (filteredProducts.length === products.length) return null;
-
-    await fs.writeFile(productsPath, JSON.stringify(filteredProducts, null, 2));
-    return id;
-  }
-
-  #generateId(products) {
-    return products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  async guardarArchivo(arrayProductos) {
+    await fs.writeFile(this.path, JSON.stringify(arrayProductos, null, 2));
   }
 }
 
-export default ProductManager;
+module.exports = ProductManager;
