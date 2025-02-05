@@ -1,1 +1,13 @@
-[]
+[
+    {
+      "id": 1,
+      "name": "Cómoda",
+      "price": 100
+    },
+    {
+      "id": 2,
+      "name": "Mesas de luz",
+      "price": 200
+    }
+  ]
+  
