@@ -1,0 +1,36 @@
+<h2>Lista de Productos</h2>
+<ul id="productList"></ul>
+
+<form id="newProductForm">
+  <input type="text" id="productName" placeholder="Nombre del Producto" required>
+  <input type="number" id="productPrice" placeholder="Precio del Producto" required>
+  <button type="submit">Agregar Producto</button>
+</form>
+
+<script>
+  const socket = io();
+  const productList = document.getElementById('productList');
+  const newProductForm = document.getElementById('newProductForm');
+  const productNameInput = document.getElementById('productName');
+  const productPriceInput = document.getElementById('productPrice');
+
+  socket.on('updateProducts', function(products) {
+    productList.innerHTML = '';
+    products.forEach(function(product) {
+      const li = document.createElement('li');
+      li.textContent = `${product.name} - $${product.price}`;
+      productList.appendChild(li);
+    });
+  });
+
+  newProductForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const newProduct = {
+      name: productNameInput.value,
+      price: productPriceInput.value
+    };
+    socket.emit('newProduct', newProduct);
+    productNameInput.value = '';
+    productPriceInput.value = '';
+  });
+</script>
