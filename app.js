@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const handlebars = require('express-handlebars');
 const path = require('path');
-const Product = require('./models/product');
+const Product = require('./src/models/product');
 
 const app = express();
 const httpServer = app.listen(3000, () => {
