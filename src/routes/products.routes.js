@@ -4,21 +4,38 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const skip = (page - 1) * limit;
+    const { limit = 10, page = 1, sort = '', query = '' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const sortOption = sort === 'asc' ? { price: 1 } : sort === 'desc' ? { price: -1 } : {};
 
-    const products = await Product.find()
+    let filter = {};
+    if (query) {
+      filter = { $or: [{ category: { $regex: query, $options: 'i' } }, { stock: { $regex: query, $options: 'i' } }] };
+    }
+
+    const products = await Product.find(filter)
       .skip(skip)
-      .limit(limit);
+      .limit(parseInt(limit))
+      .sort(sortOption);
 
-    const total = await Product.countDocuments();
+    const total = await Product.countDocuments(filter);
+
+    const totalPages = Math.ceil(total / parseInt(limit));
+    const prevPage = page > 1 ? parseInt(page) - 1 : null;
+    const nextPage = page < totalPages ? parseInt(page) + 1 : null;
 
     res.json({
-      products,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      totalItems: total,
+      status: 'success',
+      payload: products,
+      totalPages,
+      prevPage,
+      nextPage,
+      page: parseInt(page),
+      hasPrevPage: prevPage !== null,
+      hasNextPage: nextPage !== null,
+      prevLink: prevPage ? `/products?page=${prevPage}&limit=${limit}` : null,
+      nextLink: nextPage ? `/products?page=${nextPage}&limit=${limit}` : null,
     });
   } catch (error) {
     res.status(500).send({ message: 'Error al obtener los productos', error: error.message });

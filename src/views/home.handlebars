@@ -8,6 +8,14 @@
   {{/each}}
 </ul>
 
+{{#if hasPrevPage}}
+  <a href="/products?page={{prevPage}}">Página anterior</a>
+{{/if}}
+
+{{#if hasNextPage}}
+  <a href="/products?page={{nextPage}}">Página siguiente</a>
+{{/if}}
+
 <script>
   async function deleteProduct(id) {
     const confirmation = confirm("Está seguro de eliminar este producto?");
