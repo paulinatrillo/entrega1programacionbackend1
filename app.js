@@ -6,8 +6,8 @@ const path = require('path');
 const Product = require('./src/models/product');
 
 const app = express();
-const httpServer = app.listen(3000, () => {
-  console.log(`Servidor escuchando en http://localhost:3000`);
+const httpServer = app.listen(8080, () => {
+  console.log(`Servidor escuchando en http://localhost:8080`);
 });
 const io = new Server(httpServer);
 
@@ -55,4 +55,3 @@ io.on('connection', function(socket) {
     io.emit('updateProducts', products);
   });
 });
-
