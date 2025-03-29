@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Product = require('./src/models/product');
+const Product = require('../models/product');
 
 class ProductManager {
   constructor() {}
