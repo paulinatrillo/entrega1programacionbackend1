@@ -24,7 +24,7 @@ mongoose.connect('mongodb://localhost:27017/myshop', { useNewUrlParser: true, us
   .catch(err => console.error('Error de conexión a MongoDB:', err));
 
 app.get('/', async (req, res) => {
-  const products = await Product.find();
+  const products = await Product.find().lean();
   res.render('home', { products });
 });
 
@@ -39,7 +39,7 @@ app.delete('/products/:id', async (req, res) => {
     if (!product) {
       return res.status(404).send('Producto no encontrado');
     }
-    const products = await Product.find();
+    const products = await Product.find().lean();
     io.emit('updateProducts', products);
     res.status(200).send('Producto eliminado');
   } catch (error) {
@@ -51,8 +51,7 @@ io.on('connection', function(socket) {
   socket.on('newProduct', async function(productData) {
     const product = new Product(productData);
     await product.save();
-    const products = await Product.find();
+    const products = await Product.find().lean();
     io.emit('updateProducts', products);
   });
 });
-
