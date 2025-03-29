@@ -32,6 +32,21 @@ app.get('/realtimeproducts', (req, res) => {
   res.render('realTimeProducts');
 });
 
+app.delete('/products/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).send('Producto no encontrado');
+    }
+    const products = await Product.find();
+    io.emit('updateProducts', products);
+    res.status(200).send('Producto eliminado');
+  } catch (error) {
+    res.status(500).send('Error al eliminar el producto');
+  }
+});
+
 io.on('connection', function(socket) {
   socket.on('newProduct', async function(productData) {
     const product = new Product(productData);

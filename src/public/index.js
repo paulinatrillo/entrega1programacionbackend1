@@ -5,15 +5,16 @@ socket.on('updateProducts', (products) => {
   productList.innerHTML = "";
   products.forEach(product => {
     const newItem = document.createElement('li');
-    newItem.textContent = `${product.title} - $${product.price}`;
+    newItem.textContent = `${product.name} - $${product.price}`;
     productList.appendChild(newItem);
   });
 });
 
 document.getElementById('newProductForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const title = document.getElementById('productName').value;
+  const name = document.getElementById('productName').value;
   const price = document.getElementById('productPrice').value;
-  socket.emit('newProduct', { title, price });
+  socket.emit('newProduct', { name, price }); 
   e.target.reset();
 });
+

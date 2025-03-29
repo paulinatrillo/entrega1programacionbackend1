@@ -1,18 +1,18 @@
-<h1>Lista de Productos</h1>
+<h1>Lista de productos:</h1>
 <ul>
   {{#each products}}
     <li>
       {{this.name}} - ${{this.price}} 
-      <button onclick="eliminarProducto('{{this._id}}')">Eliminar</button>
+      <button onclick="deleteProduct('{{this._id}}')">Eliminar</button>
     </li>
   {{/each}}
 </ul>
 
 <script>
-  async function eliminarProducto(id) {
-    const confirmacion = confirm("¿Seguro que quieres eliminar este producto?");
-    if (confirmacion) {
-      await fetch(`/api/productos/${id}`, { method: "DELETE" });
+  async function deleteProduct(id) {
+    const confirmation = confirm("Está seguro de eliminar este producto?");
+    if (confirmation) {
+      await fetch(`/products/${id}`, { method: "DELETE" });
       location.reload();
     }
   }

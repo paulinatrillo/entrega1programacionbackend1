@@ -1,19 +1,19 @@
-const fs = require('fs').promises;
+const mongoose = require('mongoose');
+const Product = require('./models/product');
 
 class ProductManager {
-  constructor(filePath) {
-    this.filePath = filePath;
-  }
+  constructor() {}
 
   async getProducts() {
     try {
-      const data = await fs.readFile(this.filePath, 'utf8');
-      return JSON.parse(data);
+      const products = await Product.find();
+      return products;
     } catch (error) {
-      throw new Error('Error al leer los productos');
+      throw new Error('Error al obtener los productos');
     }
   }
 }
 
 module.exports = ProductManager;
+
 
