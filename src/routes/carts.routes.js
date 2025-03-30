@@ -30,4 +30,58 @@ router.post('/:cid/product/:pid', async (req, res) => {
   }
 });
 
+router.delete("/:cid/products/:pid", async (req, res) => {
+  try {
+    const { cid, pid } = req.params;
+    const updatedCart = await manager.removeProductFromCart(cid, pid);
+    if (!updatedCart) {
+      return res.status(404).send('Carrito o producto no encontrado');
+    }
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    res.status(500).send('Error al eliminar el producto del carrito');
+  }
+});
+
+router.put("/:cid", async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const products = req.body.products;
+    const updatedCart = await manager.updateCart(cid, products);
+    if (!updatedCart) {
+      return res.status(404).send('Carrito no encontrado');
+    }
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    res.status(500).send('Error al actualizar el carrito');
+  }
+});
+
+router.put("/:cid/products/:pid", async (req, res) => {
+  try {
+    const { cid, pid } = req.params;
+    const quantity = req.body.quantity;
+    const updatedCart = await manager.updateProductQuantity(cid, pid, quantity);
+    if (!updatedCart) {
+      return res.status(404).send('Carrito o producto no encontrado');
+    }
+    res.status(200).json(updatedCart);
+  } catch (error) {
+    res.status(500).send('Error al actualizar la cantidad del producto en el carrito');
+  }
+});
+
+router.delete("/:cid", async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const deletedCart = await manager.deleteCart(cid);
+    if (!deletedCart) {
+      return res.status(404).send('Carrito no encontrado');
+    }
+    res.status(200).json(deletedCart);
+  } catch (error) {
+    res.status(500).send('Error al eliminar el carrito');
+  }
+});
+
 module.exports = router;
