@@ -1,0 +1,22 @@
+<h1>Detalles de tu Carrito de Compras</h1>
+
+{{#if cart.products.length}}
+  <ul>
+    {{#each cart.products}}
+      <li>
+        <h3>{{this.product.name}}</h3>
+        <p>Precio: ${{this.product.price}}</p>
+        <p>Cantidad: {{this.quantity}}</p>
+      </li>
+    {{/each}}
+  </ul>
+  
+  <h2>Total: ${{total}}</h2>
+
+  <a href="/checkout/{{cart._id}}">Proceder a la compra</a>
+  
+{{else}}
+  <p>No hay productos en tu carrito.</p>
+{{/if}}
+
+<a href="/products">Ver más productos</a>

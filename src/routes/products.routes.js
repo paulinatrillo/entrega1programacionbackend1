@@ -59,27 +59,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:pid', async (req, res) => {
-  try {
-    const { pid } = req.params;
-    const updateData = req.body;
-
-    if (updateData.id) {
-      return res.status(400).json({ message: "No se puede modificar el ID del producto" });
-    }
-
-    const updatedProduct = await Product.findByIdAndUpdate(pid, updateData, { new: true });
-
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Producto no encontrado" });
-    }
-
-    res.json(updatedProduct);
-  } catch (error) {
-    res.status(500).json({ message: "Error al actualizar el producto", error: error.message });
-  }
-});
-
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,6 +74,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put('/:pid', async (req, res) => {
+  const { pid } = req.params;
+  const { name, description, code, price, stock, category, thumbnails } = req.body;
+
+  try {
+    const product = await Product.findById(pid);
+    if (!product) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    if (name) product.name = name;
+    if (description) product.description = description;
+    if (code) product.code = code;
+    if (price) product.price = price;
+    if (stock) product.stock = stock;
+    if (category) product.category = category;
+    if (thumbnails) product.thumbnails = thumbnails;
+
+    await product.save();
+    res.status(200).json({ message: 'Producto actualizado correctamente', product });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar el producto', error: error.message });
+  }
+});
+
 module.exports = router;
-
-

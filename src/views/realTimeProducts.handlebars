@@ -1,8 +1,14 @@
 <h2>Lista de productos</h2>
 <ul id="productList"></ul>
+
+<h2>Agregar un nuevo producto</h2>
 <form id="newProductForm">
   <input type="text" id="productName" placeholder="Nombre del producto" required>
+  <input type="text" id="productDescription" placeholder="Descripción del producto" required>
+  <input type="text" id="productCode" placeholder="Código del producto" required>
   <input type="number" id="productPrice" placeholder="Precio del producto" required>
+  <input type="number" id="productStock" placeholder="Stock" required>
+  <input type="text" id="productCategory" placeholder="Categoría" required>
   <button type="submit">Agregar producto</button>
 </form>
 
@@ -11,25 +17,51 @@
   const productList = document.getElementById('productList');
   const newProductForm = document.getElementById('newProductForm');
   const productNameInput = document.getElementById('productName');
+  const productDescriptionInput = document.getElementById('productDescription');
+  const productCodeInput = document.getElementById('productCode');
   const productPriceInput = document.getElementById('productPrice');
+  const productStockInput = document.getElementById('productStock');
+  const productCategoryInput = document.getElementById('productCategory');
 
   socket.on('updateProducts', function(products) {
     productList.innerHTML = '';
     products.forEach(function(product) {
       const li = document.createElement('li');
-      li.textContent = `${product.name} - $${product.price}`;
+      li.innerHTML = `
+        ${product.name} - $${product.price} 
+        <button class="deleteBtn" data-id="${product._id}">Eliminar</button>
+      `;
       productList.appendChild(li);
     });
   });
 
   newProductForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    
     const newProduct = {
       name: productNameInput.value,
-      price: productPriceInput.value
+      description: productDescriptionInput.value,
+      code: productCodeInput.value,
+      price: productPriceInput.value,
+      stock: productStockInput.value,
+      category: productCategoryInput.value
     };
+
     socket.emit('newProduct', newProduct);
+
     productNameInput.value = '';
+    productDescriptionInput.value = '';
+    productCodeInput.value = '';
     productPriceInput.value = '';
+    productStockInput.value = '';
+    productCategoryInput.value = '';
+  });
+
+  productList.addEventListener('click', function(e) {
+    if (e.target.classList.contains('deleteBtn')) {
+      const productId = e.target.getAttribute('data-id');
+      
+      fetch(`/products/${productId}`, { method: 'DELETE' });
+    }
   });
 </script>
