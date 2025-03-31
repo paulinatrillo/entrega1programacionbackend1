@@ -59,6 +59,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/:pid', async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const updateData = req.body;
+
+    if (updateData.id) {
+      return res.status(400).json({ message: "No se puede modificar el ID del producto" });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(pid, updateData, { new: true });
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Producto no encontrado" });
+    }
+
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Error al actualizar el producto", error: error.message });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
